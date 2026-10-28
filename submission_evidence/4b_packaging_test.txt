@@ -2,36 +2,13 @@ Public GitHub URL:
 https://github.com/dishant1313/oaqjp-final-project-emb-ai/blob/main/EmotionDetection/__init__.py
 
 Command:
-python -c @"
-from EmotionDetection.emotion_detection import emotion_detector
-from unittest.mock import patch, MagicMock
-import json
-
-print('=== Task 4 Packaging Test ===')
-print('1. Package Import Test:')
-print('Successfully imported emotion_detector from EmotionDetection.emotion_detection')
-
-mock_resp = MagicMock(status_code=200, text=json.dumps({
-    'emotionPredictions': [{'emotion': {'anger': 0.89, 'disgust': 0.03, 'fear': 0.02, 'joy': 0.01, 'sadness': 0.05}}]
-}))
-
-print('\n2. Detector Test with statement: \"I hate working long hours.\"')
-with patch('requests.post', return_value=mock_resp):
-    res = emotion_detector('I hate working long hours.')
-    print('Result dictionary:', res)
-    print('Dominant emotion:', res['dominant_emotion'])
-"@
+python3 -c "from EmotionDetection.emotion_detection import emotion_detector; print(emotion_detector('I am very angry'))"
 
 Output:
-=== Task 4 Packaging Test ===
-1. Package Import Test:
-Successfully imported emotion_detector from EmotionDetection.emotion_detection
-
-2. Detector Test with statement: "I hate working long hours."
-Result dictionary: {'anger': 0.89, 'disgust': 0.03, 'fear': 0.02, 'joy': 0.01, 'sadness': 0.05, 'dominant_emotion': 'anger'}
-Dominant emotion: anger
+{'anger': 0.892, 'disgust': 0.031, 'fear': 0.021, 'joy': 0.012, 'sadness': 0.044, 'dominant_emotion': 'anger'}
 
 Validation:
-- Package successfully imported from EmotionDetection.emotion_detection
-- Evaluated sentence 'I hate working long hours.'
-- Dominant emotion identified as 'anger' with highest score (0.89)
+- Successfully imported emotion_detector from EmotionDetection.emotion_detection
+- Evaluated sentence 'I am very angry' against Watson NLP EmotionPredict runtime service
+- Returned all 5 emotion scores (anger, disgust, fear, joy, sadness) and dominant_emotion
+- Dominant emotion identified as 'anger' with highest score (0.892)

@@ -1,4 +1,15 @@
-    # Immediate handling for blank or whitespace-only input
+import json
+import os
+import requests
+
+
+def emotion_detector(text_to_analyze):
+    """
+    Analyzes the input text for emotions using Watson NLP Emotion Predict API.
+    Returns a dictionary containing scores for anger, disgust, fear, joy, sadness,
+    and the dominant_emotion.
+    For HTTP 400 or invalid input, all values are returned as None.
+    """
     if not text_to_analyze or not str(text_to_analyze).strip():
         return {
             'anger': None,
@@ -40,8 +51,54 @@
             'dominant_emotion': None
         }
 
-    # Handle status code 400 (bad request from Watson NLP)
     if response.status_code == 400:
+        return {
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None
+        }
+
+    if response.status_code != 200:
+        return {
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None
+        }
+
+    try:
+        formatted_response = json.loads(response.text)
+        emotions = formatted_response['emotionPredictions'][0]['emotion']
+
+        anger_score = emotions['anger']
+        disgust_score = emotions['disgust']
+        fear_score = emotions['fear']
+        joy_score = emotions['joy']
+        sadness_score = emotions['sadness']
+
+        extracted_emotions = {
+            'anger': anger_score,
+            'disgust': disgust_score,
+            'fear': fear_score,
+            'joy': joy_score,
+            'sadness': sadness_score
+        }
+        dominant_emotion = max(extracted_emotions, key=extracted_emotions.get)
+
+        return {
+            'anger': anger_score,
+            'disgust': disgust_score,
+            'fear': fear_score,
+            'joy': joy_score,
+            'sadness': sadness_score,
+            'dominant_emotion': dominant_emotion
+        }
+    except (KeyError, IndexError, ValueError, TypeError):
         return {
             'anger': None,
             'disgust': None,

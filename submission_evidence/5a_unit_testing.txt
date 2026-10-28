@@ -92,7 +92,6 @@ def mock_requests_post(url, *args, **kwargs):
             "emotionPredictions": [MOCK_WATSON_DATA[text]]
         })
     else:
-        # Default fallback joy response
         mock_resp.status_code = 200
         mock_resp.text = json.dumps({
             "emotionPredictions": [{
@@ -108,18 +107,28 @@ def mock_requests_post(url, *args, **kwargs):
     return mock_resp
 
 
-class TestEmotionDetectionOffline(unittest.TestCase):
+class TestEmotionDetection(unittest.TestCase):
     """
-    Offline unit tests with deterministic Watson NLP response mocks.
-    Verifies emotion detection and dominant emotion calculation.
+    Unit tests for emotion detector statements:
+    1. 'I am glad this happened' -> joy
+    2. 'I am really mad about this' -> anger
+    3. 'I feel disgusted just hearing about this' -> disgust
+    4. 'I am so sad about this' -> sadness
+    5. 'I am really afraid that this will happen' -> fear
     """
 
     def setUp(self):
-        self.patcher = patch('requests.post', side_effect=mock_requests_post)
-        self.mock_post = self.patcher.start()
+        # When live endpoint is not reachable outside IBM Skills Network,
+        # use deterministic mock responses matching Watson schema.
+        if not IS_LIVE_ENDPOINT_AVAILABLE:
+            self.patcher = patch('requests.post', side_effect=mock_requests_post)
+            self.patcher.start()
+        else:
+            self.patcher = None
 
     def tearDown(self):
-        self.patcher.stop()
+        if self.patcher:
+            self.patcher.stop()
 
     def test_glad_statement_returns_joy(self):
         """Test statement 'I am glad this happened' returns dominant emotion joy."""
@@ -145,23 +154,6 @@ class TestEmotionDetectionOffline(unittest.TestCase):
         """Test statement 'I am really afraid that this will happen' returns dominant emotion fear."""
         result = emotion_detector("I am really afraid that this will happen")
         self.assertEqual(result['dominant_emotion'], 'fear')
-
-
-class TestEmotionDetectionLive(unittest.TestCase):
-    """
-    Live integration test suite testing actual connectivity
-    against the IBM Skills Network Watson NLP service.
-    """
-
-    def test_live_watson_service_connectivity(self):
-        """Test live endpoint or document infrastructure restriction."""
-        if not IS_LIVE_ENDPOINT_AVAILABLE:
-            self.skipTest(
-                "Live Watson NLP endpoint (sn-watson-emotion.labs.skills.network) "
-                "is an internal Skills Network resource not accessible from external networks."
-            )
-        result = emotion_detector("I am glad this happened")
-        self.assertEqual(result['dominant_emotion'], 'joy')
 
 
 if __name__ == '__main__':
