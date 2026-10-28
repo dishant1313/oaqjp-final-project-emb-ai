@@ -1,0 +1,12 @@
+Command:
+python -m pylint server.py
+
+Output:
+
+------------------------------------
+Your code has been rated at 10.00/10
+
+PyLint Static Code Analysis Summary:
+- server.py scored 10.00/10 with zero warnings, errors, or conventions violations.
+- Clean module and function-level docstrings included.
+- Valid PEP 8 naming, clean import boundaries, and proper error handling.
